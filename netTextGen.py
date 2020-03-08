@@ -4,13 +4,11 @@ import tensorflow as tf
 
 import numpy as np
 import os
-import time
 
 path_to_file = tf.keras.utils.get_file(
-    # 'trzej-muszkieterowie-tom-i.txt', 'https://wolnelektury.pl/media/book/txt/trzej-muszkieterowie-tom-i.txt')
+    # Path should look like this:
+    # file:///D:/Code/python/deepLearing/netTextGen/trainData/impactGeneral.txt
     'impactGeneralUnEdit.txt', 'file:///D:/Code/python/deepLearing/netTextGen/trainData/impactGeneralUnEdit.txt')
-# 'shakespeare.txt', 'https://storage.googleapis.com/download.tensorflow.org/data/shakespeare.txt')
-modelname = "modelGenImpact.h5"
 # Read, then decode for py2 compat.
 text = open(path_to_file, 'rb').read().decode(encoding='utf-8')
 # length of text is the number of characters in it
@@ -67,7 +65,7 @@ for i, (input_idx, target_idx) in enumerate(zip(input_example[:5], target_exampl
 
 BATCH_SIZE = 64
 
-
+# Tensorflow needs a buffer for the text data, I suggest you don't change this.
 BUFFER_SIZE = 10000
 
 dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_remainder=True)
@@ -88,14 +86,7 @@ def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
     model = tf.keras.Sequential([
         tf.keras.layers.Embedding(vocab_size, embedding_dim,
                                   batch_input_shape=[batch_size, None]),
-        tf.keras.layers.GRU(rnn_units,
-                            return_sequences=True,
-                            stateful=True,
-                            recurrent_initializer='glorot_uniform'),
-        tf.keras.layers.GRU(rnn_units,
-                            return_sequences=True,
-                            stateful=True,
-                            recurrent_initializer='glorot_uniform'),
+        # Add more layers for better results, try adding LSTM layers (not tested).
         tf.keras.layers.GRU(rnn_units,
                             return_sequences=True,
                             stateful=True,
@@ -174,6 +165,9 @@ def generate_text(model, start_string):
     # Low temperatures results in more predictable text.
     # Higher temperatures results in more surprising text.
     # Experiment to find the best setting.
+    # For me, using a 0.6 to 0.8 temperature works best.
+    # Temperatures of < 0.5 become very dull and sometimes gibberish.
+    # Temperatures of > 0.8 become gibberish.
     temperature = 0.7
 
     # Here batch size == 1
@@ -196,6 +190,6 @@ def generate_text(model, start_string):
     return (start_string + ''.join(text_generated))
 
 
+# Start string changes the "generation" to fit the start string.
 print(generate_text(model, start_string=u" "))
-# model.save(modelname)
 model.save('modelGenImpact.h5')
