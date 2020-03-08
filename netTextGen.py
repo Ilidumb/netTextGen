@@ -4,6 +4,7 @@ import tensorflow as tf
 
 import numpy as np
 import os
+import time
 
 path_to_file = tf.keras.utils.get_file(
     # Path should look like this:
