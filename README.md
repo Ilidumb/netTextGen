@@ -1,3 +1,4 @@
+Warning: it's all probably broken.
 # netTextGen
 Text Generation with TensorFlow using a Recurrent Neural Network
 
